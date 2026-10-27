@@ -13,7 +13,7 @@ This repo takes an Azure hub-spoke network that was built by hand (click-ops, si
 | Step 1 apply | ✅ `18 imported, 0 added, 0 changed, 0 destroyed`; the follow-up plan shows no changes |
 | Step 2 plan + apply (NAT gateway + Databricks workspace) | ✅ `6 to add, 0 to change, 0 to destroy`; `assert-plan.sh no-destroy` passes; the workspace was created in 4m23s |
 | Plan after step 2 | ✅ No changes, although Databricks has added 6 rules to each delegated NSG |
-| Starting a cluster in the workspace | ⏳ Not verified yet |
+| Cluster in the injected VNet | ✅ The node VM has one NIC in `snet-dbx-host` and one in `snet-dbx-container`, no public IP; NAT gateway metrics show outbound SNAT connections from it |
 | Optional `plan` CI job (OIDC) | ⏳ Written, not yet wired to a subscription |
 
 ## Architecture
@@ -162,7 +162,7 @@ Run `legacy/teardown.sh` (or delete both resource groups) when you are done.
 
 ## Limitations
 
-- Steps 1 and 2 were applied against a real subscription, but starting a cluster (which would confirm egress through the NAT gateway end to end) has not been verified yet.
+- Tested on an Azure Free Trial subscription, which allows only 4 vCPUs per region: enough for one single-node cluster, no more.
 - The `plan` CI job has not run yet (no OIDC credential configured). It uses local state, so it can only assert the import step from scratch.
 - Only one environment (`dev`) and one spoke.
 - checkov runs in soft-fail mode.
