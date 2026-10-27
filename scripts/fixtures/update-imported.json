@@ -1,0 +1,28 @@
+{
+  "format_version": "1.2",
+  "terraform_version": "1.17.0",
+  "resource_changes": [
+    {
+      "address": "azurerm_resource_group.hub",
+      "mode": "managed",
+      "type": "azurerm_resource_group",
+      "name": "hub",
+      "change": {
+        "actions": ["no-op"],
+        "importing": { "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-hub-dev" }
+      }
+    },
+    {
+      "address": "module.hub.azurerm_network_security_group.this[\"snet-shared\"]",
+      "module_address": "module.hub",
+      "mode": "managed",
+      "type": "azurerm_network_security_group",
+      "name": "this",
+      "index": "snet-shared",
+      "change": {
+        "actions": ["update"],
+        "importing": { "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-hub-dev/providers/Microsoft.Network/networkSecurityGroups/nsg-snet-shared" }
+      }
+    }
+  ]
+}

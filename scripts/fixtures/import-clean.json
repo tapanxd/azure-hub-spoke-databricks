@@ -1,0 +1,35 @@
+{
+  "format_version": "1.2",
+  "terraform_version": "1.17.0",
+  "resource_changes": [
+    {
+      "address": "azurerm_resource_group.hub",
+      "mode": "managed",
+      "type": "azurerm_resource_group",
+      "name": "hub",
+      "change": {
+        "actions": ["no-op"],
+        "importing": { "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-hub-dev" }
+      }
+    },
+    {
+      "address": "module.spoke_dbx.azurerm_subnet.this[\"snet-dbx-host\"]",
+      "module_address": "module.spoke_dbx",
+      "mode": "managed",
+      "type": "azurerm_subnet",
+      "name": "this",
+      "index": "snet-dbx-host",
+      "change": {
+        "actions": ["no-op"],
+        "importing": { "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-spoke-dbx-dev/providers/Microsoft.Network/virtualNetworks/vnet-spoke-dbx-dev/subnets/snet-dbx-host" }
+      }
+    },
+    {
+      "address": "data.azurerm_client_config.current",
+      "mode": "data",
+      "type": "azurerm_client_config",
+      "name": "current",
+      "change": { "actions": ["read"] }
+    }
+  ]
+}

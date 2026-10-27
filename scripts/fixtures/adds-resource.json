@@ -1,0 +1,25 @@
+{
+  "format_version": "1.2",
+  "terraform_version": "1.17.0",
+  "resource_changes": [
+    {
+      "address": "azurerm_resource_group.spoke",
+      "mode": "managed",
+      "type": "azurerm_resource_group",
+      "name": "spoke",
+      "change": {
+        "actions": ["no-op"],
+        "importing": { "id": "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg-spoke-dbx-dev" }
+      }
+    },
+    {
+      "address": "module.databricks[0].azurerm_nat_gateway.this[0]",
+      "module_address": "module.databricks[0]",
+      "mode": "managed",
+      "type": "azurerm_nat_gateway",
+      "name": "this",
+      "index": 0,
+      "change": { "actions": ["create"] }
+    }
+  ]
+}
