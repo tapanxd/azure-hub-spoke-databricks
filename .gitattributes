@@ -1,0 +1,8 @@
+# Store and check out text files with LF, also on Windows. CRLF in a .sh file
+# breaks the shebang ("/usr/bin/env: 'bash\r': No such file or directory").
+* text=auto eol=lf
+*.sh text eol=lf
+Makefile text eol=lf
+
+*.png binary
+*.jpg binary
