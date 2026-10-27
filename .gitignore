@@ -1,0 +1,35 @@
+# Terraform working dirs and state
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+
+# Plan files (binary and JSON)
+*.tfplan
+*.tfplan.json
+tfplan
+tfplan.json
+plan.json
+
+# Local variable values and backend config (may contain subscription IDs)
+terraform.tfvars
+*.auto.tfvars
+backend.tf
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Lock files: commit only envs/dev's
+modules/**/.terraform.lock.hcl
+
+# Local notes and docs; README is the only committed markdown
+*.md
+!README.md
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
