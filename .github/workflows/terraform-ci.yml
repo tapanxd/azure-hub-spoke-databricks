@@ -100,6 +100,9 @@ jobs:
       id-token: write
     env:
       ARM_USE_OIDC: "true"
+      # bootstrap.sh registers the providers this config needs; skipping
+      # auto-registration lets the CI identity get by with Reader.
+      ARM_RESOURCE_PROVIDER_REGISTRATIONS: none
       ARM_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
       ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
