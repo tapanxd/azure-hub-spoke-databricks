@@ -1,26 +1,26 @@
 #!/usr/bin/env bash
-# Creates the "pre-existing", click-ops style hub-spoke network that envs/dev
-# then adopts with import blocks. Deliberately no Terraform here.
+# Stands in for the hand-built network, so envs/dev has something to import.
+# No NAT gateway or Databricks here; Terraform adds those in step 2.
 #
-# Usage: ENV=dev LOCATION=eastus2 legacy/bootstrap.sh
-#        DRY_RUN=1 legacy/bootstrap.sh   # print the az commands, change nothing
+#   ENV=dev LOCATION=eastus2 legacy/bootstrap.sh
+#   DRY_RUN=1 legacy/bootstrap.sh    # print the az commands only
 #
-# Does NOT create the NAT gateway or the Databricks workspace: those are new
-# resources that Terraform adds in step 2.
+# TODO: only ever run against an empty subscription. Re-running on top of an
+# existing env is untested (peering create may complain).
 set -euo pipefail
 
 ENV=${ENV:-dev}
 LOCATION=${LOCATION:-eastus2}
 DRY_RUN=${DRY_RUN:-0}
 
-# Names must match envs/dev/locals.tf.
+# keep in sync with envs/dev/locals.tf
 HUB_RG="rg-hub-${ENV}"
 SPOKE_RG="rg-spoke-dbx-${ENV}"
 HUB_VNET="vnet-hub-${ENV}"
 SPOKE_VNET="vnet-spoke-dbx-${ENV}"
 
-# CIDRs are hardcoded here; envs/dev/locals.tf derives the same values with
-# cidrsubnet() from the VNet address spaces:
+# locals.tf derives these with cidrsubnet(); hardcoded here on purpose, since a
+# hand-built network wouldn't have them computed either.
 #   snet-shared        = cidrsubnet("10.0.0.0/22", 2, 0) = 10.0.0.0/24
 #   snet-dbx-host      = cidrsubnet("10.1.0.0/22", 3, 0) = 10.1.0.0/25
 #   snet-dbx-container = cidrsubnet("10.1.0.0/22", 3, 1) = 10.1.0.128/25
@@ -46,8 +46,7 @@ if [[ "$DRY_RUN" != "1" ]]; then
 fi
 echo "Environment: ${ENV}  Location: ${LOCATION}"
 
-# --- Resource providers ------------------------------------------------------
-# Registration is per subscription and can take a few minutes on a fresh one.
+# per subscription, and can take a few minutes on a fresh one
 
 PROVIDERS=(Microsoft.Network Microsoft.Databricks)
 for ns in "${PROVIDERS[@]}"; do
@@ -69,10 +68,7 @@ if [[ "$DRY_RUN" != "1" ]]; then
   done
 fi
 
-# --- Helpers -----------------------------------------------------------------
-
 # create_subnet <rg> <vnet> <subnet> <cidr> [extra az args...]
-# Every subnet gets its own NSG (nsg-<subnet>) and no default outbound access.
 create_subnet() {
   local rg=$1 vnet=$2 subnet=$3 cidr=$4
   shift 4
@@ -84,6 +80,7 @@ create_subnet() {
     "$@" -o none
 }
 
+# peering needs full IDs, the VNets are in different RGs
 vnet_id() {
   if [[ "$DRY_RUN" == "1" ]]; then
     echo "<id of $2>"
@@ -92,14 +89,10 @@ vnet_id() {
   fi
 }
 
-# --- Hub ---------------------------------------------------------------------
-
 run az group create -n "$HUB_RG" -l "$LOCATION" "${TAGS[@]}" -o none
 run az network vnet create -g "$HUB_RG" -n "$HUB_VNET" -l "$LOCATION" \
   --address-prefixes "$HUB_CIDR" "${TAGS[@]}" -o none
 create_subnet "$HUB_RG" "$HUB_VNET" snet-shared 10.0.0.0/24
-
-# --- Databricks spoke --------------------------------------------------------
 
 run az group create -n "$SPOKE_RG" -l "$LOCATION" "${TAGS[@]}" -o none
 run az network vnet create -g "$SPOKE_RG" -n "$SPOKE_VNET" -l "$LOCATION" \
@@ -109,8 +102,6 @@ create_subnet "$SPOKE_RG" "$SPOKE_VNET" snet-dbx-host 10.1.0.0/25 \
 create_subnet "$SPOKE_RG" "$SPOKE_VNET" snet-dbx-container 10.1.0.128/25 \
   --delegations Microsoft.Databricks/workspaces
 create_subnet "$SPOKE_RG" "$SPOKE_VNET" snet-workload 10.1.1.0/24
-
-# --- Peering (both directions, VNet access only) -----------------------------
 
 HUB_VNET_ID=$(vnet_id "$HUB_RG" "$HUB_VNET")
 SPOKE_VNET_ID=$(vnet_id "$SPOKE_RG" "$SPOKE_VNET")

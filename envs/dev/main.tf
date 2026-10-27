@@ -51,7 +51,7 @@ module "peering" {
   spoke_to_hub_name = local.peering_spoke_to_hub_name
 }
 
-# Step 2 of the migration: new resources on top of the imported network.
+# step 2
 module "databricks" {
   count  = var.enable_databricks ? 1 : 0
   source = "../../modules/databricks-workspace"

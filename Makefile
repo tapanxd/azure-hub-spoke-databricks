@@ -1,5 +1,5 @@
-# Local equivalents of the CI jobs. `make check` runs everything that needs no Azure access.
-# Recipes start with ">" instead of a tab.
+# Same checks as CI, minus the Azure plan.
+# ">" instead of tabs so an editor can't silently break the recipes.
 .RECIPEPREFIX = >
 SHELL := /bin/bash
 .SHELLFLAGS := -eu -o pipefail -c

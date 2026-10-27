@@ -1,6 +1,5 @@
-# Explicit egress for the injected subnets. New VNets have no default outbound
-# internet access (since 31 Mar 2026), and with secure cluster connectivity the
-# nodes have no public IPs, so clusters cannot reach the control plane without this.
+# Subnets have no default outbound access and nodes get no public IP, so
+# without a NAT (or a firewall) clusters can't reach the control plane.
 
 resource "azurerm_public_ip" "nat" {
   count = var.create_nat_gateway ? 1 : 0
@@ -62,7 +61,8 @@ resource "azurerm_databricks_workspace" "this" {
     private_subnet_network_security_group_association_id = var.private_subnet_nsg_association_id
   }
 
-  # Attach egress before the workspace takes ownership of the subnets.
+  # NAT first. Not sure the workspace actually cares about the order, but
+  # this is the order that was tested.
   depends_on = [
     azurerm_nat_gateway_public_ip_association.this,
     azurerm_subnet_nat_gateway_association.public,

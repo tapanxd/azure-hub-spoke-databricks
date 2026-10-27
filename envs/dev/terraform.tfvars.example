@@ -1,14 +1,15 @@
-# cp terraform.tfvars.example terraform.tfvars   (terraform.tfvars is gitignored)
+# cp terraform.tfvars.example terraform.tfvars  (gitignored)
 
 subscription_id = "00000000-0000-0000-0000-000000000000"
 
-# Must match what legacy/bootstrap.sh was run with.
+# same values bootstrap.sh ran with
 location    = "eastus2"
 environment = "dev"
 
-# Step 1: adopt the existing network. Plan should read "N to import, 0 to add/change/destroy".
+# Step 1. Plan should be 18 to import, nothing else.
 import_existing   = true
 enable_databricks = false
 
-# Step 2: flip this to add the NAT gateway and the VNet-injected workspace.
+# Step 2, after step 1 is applied:
+# import_existing   = false
 # enable_databricks = true

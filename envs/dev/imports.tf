@@ -1,8 +1,5 @@
-# Import blocks (Terraform >= 1.7 for for_each) adopt the click-ops network into
-# the module addresses without touching Azure. `terraform plan` previews them as
-# "N to import"; the first apply writes them to state.
-#
-# After that first apply, set import_existing = false (or delete this file).
+# Adopts what legacy/bootstrap.sh built. After the first apply, set
+# import_existing = false or delete this file.
 
 locals {
   sub_prefix = "/subscriptions/${var.subscription_id}/resourceGroups"
@@ -14,17 +11,16 @@ locals {
   hub_nsg_prefix   = "${local.hub_rg_id}/providers/Microsoft.Network/networkSecurityGroups/nsg-"
   spoke_nsg_prefix = "${local.spoke_rg_id}/providers/Microsoft.Network/networkSecurityGroups/nsg-"
 
-  # name => name maps. Filtering with `if` (rather than `cond ? local.x : {}`)
-  # avoids a type error: the spoke subnets mix delegation = null and an object,
-  # so local.spoke_subnets is an object type that cannot unify with {}.
+  # Not `var.import_existing ? local.spoke_subnets : {}`. The spoke subnets mix
+  # delegation = null and an object, so the two sides don't unify and plan
+  # fails. validate doesn't catch it, the env test does.
   import_hub_subnets   = { for k, s in local.hub_subnets : k => k if var.import_existing }
   import_spoke_subnets = { for k, s in local.spoke_subnets : k => k if var.import_existing }
   import_hub_nsgs      = { for k, s in local.hub_subnets : k => k if var.import_existing && s.create_nsg }
   import_spoke_nsgs    = { for k, s in local.spoke_subnets : k => k if var.import_existing && s.create_nsg }
 }
 
-# --- Resource groups ---------------------------------------------------------
-
+# single-item maps so import_existing can switch these off too
 import {
   for_each = var.import_existing ? { id = local.hub_rg_id } : {}
   to       = azurerm_resource_group.hub
@@ -36,8 +32,6 @@ import {
   to       = azurerm_resource_group.spoke
   id       = each.value
 }
-
-# --- Virtual networks --------------------------------------------------------
 
 import {
   for_each = var.import_existing ? { id = local.hub_vnet_id } : {}
@@ -51,8 +45,6 @@ import {
   id       = each.value
 }
 
-# --- Subnets -----------------------------------------------------------------
-
 import {
   for_each = local.import_hub_subnets
   to       = module.hub.azurerm_subnet.this[each.key]
@@ -64,9 +56,6 @@ import {
   to       = module.spoke_dbx.azurerm_subnet.this[each.key]
   id       = "${local.spoke_vnet_id}/subnets/${each.key}"
 }
-
-# --- NSGs and their subnet associations --------------------------------------
-# The association's import ID is the ID of the subnet it is attached to.
 
 import {
   for_each = local.import_hub_nsgs
@@ -80,6 +69,7 @@ import {
   id       = "${local.spoke_nsg_prefix}${each.key}"
 }
 
+# association import ID = the subnet's ID, not anything NSG-shaped
 import {
   for_each = local.import_hub_nsgs
   to       = module.hub.azurerm_subnet_network_security_group_association.this[each.key]
@@ -91,8 +81,6 @@ import {
   to       = module.spoke_dbx.azurerm_subnet_network_security_group_association.this[each.key]
   id       = "${local.spoke_vnet_id}/subnets/${each.key}"
 }
-
-# --- Peerings ----------------------------------------------------------------
 
 import {
   for_each = var.import_existing ? { id = "${local.hub_vnet_id}/virtualNetworkPeerings/${local.peering_hub_to_spoke_name}" } : {}

@@ -1,19 +1,18 @@
 #!/usr/bin/env bash
-# Runs scripts/assert-plan.sh against the fixtures and checks the exit code
-# for every fixture/mode pair. No Terraform or Azure needed, only jq.
+# Exit code for every fixture/mode pair. Only needs jq.
+# No -e: half of these are supposed to exit non-zero.
 set -uo pipefail
 
 DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 ASSERT="$DIR/assert-plan.sh"
 FIX="$DIR/fixtures"
 
-# Keep the test output out of a real GitHub step summary.
+# don't write fixture results into the real CI step summary
 unset GITHUB_STEP_SUMMARY
 
 pass=0
 fail=0
 
-# expect <exit code> <description> <args...>
 expect() {
   local want=$1 desc=$2
   shift 2
@@ -28,7 +27,6 @@ expect() {
   fi
 }
 
-#              exit  description                                  args
 expect 0 "import-clean     import-only"  "$FIX/import-clean.json" import-only
 expect 0 "import-clean     no-destroy"   "$FIX/import-clean.json" no-destroy
 expect 0 "import-clean     default mode" "$FIX/import-clean.json"

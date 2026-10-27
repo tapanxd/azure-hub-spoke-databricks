@@ -8,8 +8,7 @@ terraform {
     }
   }
 
-  # Local state is fine for a first import dry run. For anything shared, copy
-  # backend.tf.example to backend.tf (azurerm backend) and re-run `terraform init`.
+  # Local state. See backend.tf.example before sharing this with anyone.
 }
 
 provider "azurerm" {

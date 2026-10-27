@@ -74,7 +74,7 @@ jobs:
       - run: scripts/test-assert-plan.sh
 
   security:
-    # Soft-fail until the findings are triaged (see README).
+    # soft-fail until the two Databricks findings are dealt with (see README)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -84,10 +84,9 @@ jobs:
       - run: pip install checkov
       - run: checkov -d . --framework terraform --soft-fail --compact --quiet
 
-  # Real plan against Azure. Runs only when the repo variable AZURE_CLIENT_ID is
-  # set (OIDC federated credential, no client secret) and never for fork PRs,
-  # which get no OIDC token. Uses local state, so the plan always starts from
-  # the import step; see README for using the azurerm backend instead.
+  # Optional: needs vars.AZURE_CLIENT_ID (OIDC). Fork PRs get no OIDC token, so
+  # they're skipped. State is local, so this always plans the import step from
+  # scratch. TODO: point it at a real backend.
   plan:
     needs: [fmt, validate, test, scripts]
     if: >-
@@ -100,8 +99,7 @@ jobs:
       id-token: write
     env:
       ARM_USE_OIDC: "true"
-      # bootstrap.sh registers the providers this config needs; skipping
-      # auto-registration lets the CI identity get by with Reader.
+      # bootstrap.sh already registered the providers. Without this, Reader isn't enough.
       ARM_RESOURCE_PROVIDER_REGISTRATIONS: none
       ARM_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
       ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}

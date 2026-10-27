@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
-# Deletes everything bootstrap.sh and Terraform created: the hub and spoke
-# resource groups. Deleting the spoke group also deletes the Databricks
-# workspace, which in turn removes its managed resource group.
+# Deletes both resource groups. The managed databricks-rg-* group is cleaned
+# up by Databricks after the workspace goes; last time that lagged a while.
 #
-# Usage: ENV=dev legacy/teardown.sh
+# `terraform destroy` in envs/dev is the cleaner option once everything is in
+# state. This one also works when the state is missing or half-done.
+#
+#   ENV=dev legacy/teardown.sh
 set -euo pipefail
 
 ENV=${ENV:-dev}
@@ -23,7 +25,7 @@ if [[ "$answer" != "$ENV" ]]; then
   exit 1
 fi
 
-# Spoke first: it holds the workspace and NAT gateway.
+# spoke first, it's the slow one
 for rg in "${RGS[@]}"; do
   if [[ "$(az group exists -n "$rg")" == "true" ]]; then
     echo "Deleting ${rg} (this can take several minutes)..."

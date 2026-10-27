@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
-# Guard a Terraform plan before it is applied.
+# Fails if a plan does more than it should.
 #
-# Usage: scripts/assert-plan.sh <plan.json> [import-only|no-destroy]
-#   plan.json: output of `terraform show -json <planfile>`
-#   import-only (default): every change must be a no-op (imports are no-ops) or a read.
-#   no-destroy: nothing may be deleted, which includes replacements.
+#   scripts/assert-plan.sh plan.json [import-only|no-destroy]
 #
-# Exit codes: 0 = plan passes, 1 = offending changes found, 2 = usage error.
+# plan.json is `terraform show -json tfplan`. Imports show up as "no-op" with
+# change.importing set; there's no "import" action.
+#   import-only (default): only no-op / read
+#   no-destroy: no "delete" anywhere, which also catches replaces
+# exit 0 = ok, 1 = offenders, 2 = bad usage
 set -euo pipefail
 
 usage() {
@@ -36,7 +37,7 @@ case "$MODE" in
     ;;
 esac
 
-# Plans with no changes may omit resource_changes entirely.
+# resource_changes is missing entirely on an empty plan
 offenders=$(jq -r ".resource_changes // [] | .[] | ${filter} | \"\(.change.actions | join(\",\")) \(.address)\"" "$PLAN")
 imports=$(jq '[.resource_changes // [] | .[] | select(.change.importing != null)] | length' "$PLAN")
 total=$(jq '.resource_changes // [] | length' "$PLAN")

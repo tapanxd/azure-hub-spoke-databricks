@@ -1,6 +1,5 @@
-# Offline check of the two migration steps. Mock providers cannot import, so
-# every imported resource gets an override_resource; the overridden IDs only
-# need to be well formed enough for azurerm's ID parsers.
+# Mock providers can't import, hence all the override_resource blocks.
+# The IDs only need to get past azurerm's ID parsing; random mock strings don't.
 
 mock_provider "azurerm" {}
 
