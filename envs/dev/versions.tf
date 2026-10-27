@@ -7,8 +7,6 @@ terraform {
       version = "~> 4.0"
     }
   }
-
-  # Local state. See backend.tf.example before sharing this with anyone.
 }
 
 provider "azurerm" {

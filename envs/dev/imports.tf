@@ -1,5 +1,4 @@
-# Adopts what legacy/bootstrap.sh built. After the first apply, set
-# import_existing = false or delete this file.
+# Adopts what legacy/bootstrap.sh built.
 
 locals {
   sub_prefix = "/subscriptions/${var.subscription_id}/resourceGroups"

@@ -1,15 +1,13 @@
-# cp terraform.tfvars.example terraform.tfvars  (gitignored)
-
 subscription_id = "00000000-0000-0000-0000-000000000000"
 
 # same values bootstrap.sh ran with
 location    = "eastus2"
 environment = "dev"
 
-# Step 1. Plan should be 18 to import, nothing else.
+# step 1
 import_existing   = true
 enable_databricks = false
 
-# Step 2, after step 1 is applied:
+# step 2
 # import_existing   = false
 # enable_databricks = true

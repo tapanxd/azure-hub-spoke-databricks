@@ -1,12 +1,6 @@
 #!/usr/bin/env bash
 # Stands in for the hand-built network, so envs/dev has something to import.
 # No NAT gateway or Databricks here; Terraform adds those in step 2.
-#
-#   ENV=dev LOCATION=eastus2 legacy/bootstrap.sh
-#   DRY_RUN=1 legacy/bootstrap.sh    # print the az commands only
-#
-# TODO: only ever run against an empty subscription. Re-running on top of an
-# existing env is untested (peering create may complain).
 set -euo pipefail
 
 ENV=${ENV:-dev}

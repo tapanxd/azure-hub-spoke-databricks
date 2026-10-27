@@ -1,11 +1,6 @@
 #!/usr/bin/env bash
 # Deletes both resource groups. The managed databricks-rg-* group is cleaned
 # up by Databricks after the workspace goes; last time that lagged a while.
-#
-# `terraform destroy` in envs/dev is the cleaner option once everything is in
-# state. This one also works when the state is missing or half-done.
-#
-#   ENV=dev legacy/teardown.sh
 set -euo pipefail
 
 ENV=${ENV:-dev}

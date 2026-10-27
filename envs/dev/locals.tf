@@ -29,7 +29,7 @@ locals {
     ]
   }
 
-  # bootstrap.sh hardcodes the results of these. Change one, change both.
+  # bootstrap.sh hardcodes the results of these
   hub_subnets = {
     (local.hub_shared_subnet) = {
       address_prefixes                = [cidrsubnet(var.hub_address_space, 2, 0)]

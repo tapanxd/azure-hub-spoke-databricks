@@ -74,7 +74,7 @@ jobs:
       - run: scripts/test-assert-plan.sh
 
   security:
-    # soft-fail until the two Databricks findings are dealt with (see README)
+    # soft-fail: two known findings on the workspace, see README
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -84,9 +84,8 @@ jobs:
       - run: pip install checkov
       - run: checkov -d . --framework terraform --soft-fail --compact --quiet
 
-  # Optional: needs vars.AZURE_CLIENT_ID (OIDC). Fork PRs get no OIDC token, so
-  # they're skipped. State is local, so this always plans the import step from
-  # scratch. TODO: point it at a real backend.
+  # Skipped without vars.AZURE_CLIENT_ID, and for fork PRs (no OIDC token).
+  # State is local, so this always plans the import step from scratch.
   plan:
     needs: [fmt, validate, test, scripts]
     if: >-

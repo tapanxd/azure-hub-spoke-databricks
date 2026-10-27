@@ -1,6 +1,3 @@
-# --recursive resolves a relative --config per directory, so pass an absolute path:
-#   tflint --recursive --config "$(pwd)/.tflint.hcl"
-
 config {
   call_module_type = "local"
 }

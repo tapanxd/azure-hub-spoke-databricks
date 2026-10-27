@@ -1,10 +1,7 @@
 #!/usr/bin/env bash
 # Fails if a plan does more than it should.
 #
-#   scripts/assert-plan.sh plan.json [import-only|no-destroy]
-#
-# plan.json is `terraform show -json tfplan`. Imports show up as "no-op" with
-# change.importing set; there's no "import" action.
+# Imports show up as "no-op" with change.importing set; there's no "import" action.
 #   import-only (default): only no-op / read
 #   no-destroy: no "delete" anywhere, which also catches replaces
 # exit 0 = ok, 1 = offenders, 2 = bad usage
