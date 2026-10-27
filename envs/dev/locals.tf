@@ -19,8 +19,10 @@ locals {
   dbx_container_subnet  = "snet-dbx-container"
   spoke_workload_subnet = "snet-workload"
 
+  # name = "0" because that is what `az network vnet subnet create --delegations`
+  # calls it (it names delegations by index); anything else is drift on import.
   databricks_delegation = {
-    name         = "databricks"
+    name         = "0"
     service_name = "Microsoft.Databricks/workspaces"
     actions = [
       "Microsoft.Network/virtualNetworks/subnets/join/action",
