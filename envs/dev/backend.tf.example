@@ -1,0 +1,12 @@
+# Remote state in Azure Storage. Copy to backend.tf, fill in, then `terraform init -migrate-state`.
+# Create the storage account out of band (it must exist before Terraform can use it).
+
+terraform {
+  backend "azurerm" {
+    resource_group_name  = "rg-tfstate"
+    storage_account_name = "sttfstate<unique>"
+    container_name       = "tfstate"
+    key                  = "hub-spoke-dev.tfstate"
+    use_azuread_auth     = true
+  }
+}
