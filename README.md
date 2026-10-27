@@ -10,8 +10,10 @@ This repo takes an Azure hub-spoke network that was built by hand (click-ops, si
 |---|---|
 | Modules, tests, lint, CI (no Azure credentials needed) | ✅ Green locally (`make check`) and in GitHub Actions |
 | Step 1 import plan against a real subscription | ✅ `Plan: 18 to import, 0 to add, 0 to change, 0 to destroy.` |
-| Step 1 apply (write imports to state) | ⏳ Not run yet |
-| Step 2: NAT gateway + Databricks workspace | ⏳ Not run yet; covered only by mock-provider tests |
+| Step 1 apply | ✅ `18 imported, 0 added, 0 changed, 0 destroyed`; the follow-up plan shows no changes |
+| Step 2 plan + apply (NAT gateway + Databricks workspace) | ✅ `6 to add, 0 to change, 0 to destroy`; `assert-plan.sh no-destroy` passes; the workspace was created in 4m23s |
+| Plan after step 2 | ✅ No changes, although Databricks has added 6 rules to each delegated NSG |
+| Starting a cluster in the workspace | ⏳ Not verified yet |
 | Optional `plan` CI job (OIDC) | ⏳ Written, not yet wired to a subscription |
 
 ## Architecture
@@ -146,6 +148,8 @@ Every difference between the hand-built resources and the Terraform config was f
 
 The other suspected sources of drift matched on the first real plan: delegation `actions` (listed explicitly, in the order Azure returns them), `default_outbound_access_enabled = false`, and tags.
 
+After step 2, Databricks added six `Microsoft.Databricks-workspaces_UseOnly_*` rules to each delegated NSG. The NSGs declare no inline rules (`security_rule` is optional and computed), so the next plan still shows no changes, and Terraform does not try to remove them.
+
 ## Cost
 
 These are charged while deployed:
@@ -158,9 +162,8 @@ Run `legacy/teardown.sh` (or delete both resource groups) when you are done.
 
 ## Limitations
 
-- Step 2 (NAT gateway + workspace) has not been applied against Azure yet. Whether the workspace creates cleanly with the NAT associations in place, and whether a cluster can start, is unverified.
+- Steps 1 and 2 were applied against a real subscription, but starting a cluster (which would confirm egress through the NAT gateway end to end) has not been verified yet.
 - The `plan` CI job has not run yet (no OIDC credential configured). It uses local state, so it can only assert the import step from scratch.
-- Databricks adds its own rules to the NSGs on the delegated subnets. The NSGs therefore declare no inline rules: `security_rule` is optional and computed, so Terraform does not fight Databricks over them.
 - Only one environment (`dev`) and one spoke.
 - checkov runs in soft-fail mode.
 
